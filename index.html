@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Hover Parallax</title>
+
+	<style>
+		* { box-sizing: border-box }
+		body {
+			display: flex;
+			height: 100vh;
+			margin: 0;
+			justify-content: center;
+			align-items: center;
+			font-family: 'Roboto', sans-serif;
+		}
+		body.btn-hover {
+			cursor: pointer;
+		}
+		.content {
+			width: 100%;
+			text-align: center;
+		}
+		.button {
+			margin: auto;
+			cursor: pointer;
+			-moz-appearance: none;
+			-webkit-appearance: none;
+			border: 0;
+			color: #111;
+			background: none;
+			width: 10rem;
+			height: 10rem;
+			padding: 0;
+			margin: 1rem;
+			font-family: inherit;
+			font-size: 1.2rem;
+			position: relative;
+		}
+
+		.button:focus,
+		.button--hover {
+			outline: none;
+			border-color: #31a290;
+			color: #111;
+			background: transparent;
+		}
+		.button__deco {
+			position: absolute;
+			top: 0;
+			left: 0;
+			bottom: 0;
+			right: 0;
+			width: 80%;
+			height: 80%;
+			margin: auto;
+			border-width: 1px;
+			border-style: solid;
+			border-radius: 50%;
+		}
+		.button__deco--1 {
+			border-color: #5a5456;
+		}
+		.button--hover .button__deco--1 {
+			border-color: #31a290;
+		}
+		.button__deco--2 {
+			border-color: #5a5456;
+		}
+		.button--hover .button__deco--2 {
+			border-color: #31a290;
+		}
+		.button__text {
+			overflow: hidden;
+		}
+	</style>
+</head>
+<body>
+	<div class="content">
+		<button class="button">
+			<div class="button__deco button__deco--2"></div>
+			<div class="button__deco button__deco--1""></div>
+			<span class="button__text">
+				<span class="button__text-inner">Menu</span>
+			</span>
+		</button>
+	</div>
+
+	<script>
+		var posY, posX, btn, btnX, btnY, rect, distanceToTrigger, distanceMouseButton, decoTop, decoBottom, rendererStyle, lerp, text;
+
+		decoTop = document.querySelector('.button__deco--1')
+		decoBottom = document.querySelector('.button__deco--2')
+		text = document.querySelector('.button__text')
+
+		lerp = function lerp(a, b, n) {
+			return (1 - n) * a + n * b;
+		};
+
+		rendererStyle = {
+			tx: {
+				previous: 0,
+				current: 0,
+				amt: 0.1
+			},
+			ty: {
+				previous: 0,
+				current: 0,
+				amt: 0.1
+			},
+			tx2: {
+				previous: 0,
+				current: 0,
+				amt: 0.05
+			},
+			ty2: {
+				previous: 0,
+				current: 0,
+				amt: 0.05
+			}
+		}
+
+		btn = document.querySelector('.button');
+
+		rect = btn.getBoundingClientRect();
+		distanceToTrigger = rect.width * 1.5;
+
+		var getMousePos = () => {
+			window.addEventListener('mousemove', (e) => {
+				if(e) {
+					posX = e.clientX;
+					posY = e.clientY;
+					distance(posX, posY, rect.left + rect.width / 2, rect.top + rect.height / 2);
+					getDistance();
+
+					var x = 0;
+					var y = 0;
+
+					if(distanceMouseButton < distanceToTrigger) {
+						btnEnter();
+			
+						btn.classList.add('button--hover')
+						document.body.classList.add('btn-hover')
+
+						x = (posX - (rect.left + rect.width / 2)) * .3;
+						y = (posY - (rect.top + rect.height / 2)) * .3;
+
+						rendererStyle['tx'].current = rendererStyle['tx2'].current = x;
+						rendererStyle['ty'].current = rendererStyle['ty2'].current = y;
+					} else {
+						btnLeave();
+						
+						btn.classList.remove('button--hover')
+						document.body.classList.remove('btn-hover')
+					}
+				}
+			})
+		}
+
+		var distance = function distance(x1, y1, x2, y2) {
+			var a = x1 - x2;
+			var b = y1 - y2;
+			return Math.hypot(a, b);
+		}
+
+		var getDistance = () => {
+			distanceMouseButton = (0, distance)(posX, posY, rect.left + rect.width / 2, rect.top + rect.height / 2)
+		}
+
+		var btnEnter = () => {
+
+
+			for (var key in this.rendererStyle) {
+				rendererStyle[key].previous = (0, lerp)(rendererStyle[key].previous,
+				rendererStyle[key].current, 
+				rendererStyle[key].amt);
+			}
+
+			decoTop.style.transform = "translate3d(".concat(rendererStyle['tx'].previous, "px, ").concat(rendererStyle['ty'].previous, "px, 0)");
+			decoBottom.style.transform = "translate3d(".concat(rendererStyle['tx2'].previous, "px, ").concat(rendererStyle['ty2'].previous, "px, 0)");
+            text.style.transform = "translate3d(".concat(rendererStyle['tx'].previous * 0.5, "px, ").concat(rendererStyle['ty'].previous * 0.5, "px, 0)");
+
+			
+			requestAnimationFrame(function() {
+				return btnEnter();
+			});
+		}
+
+		var btnLeave = () => {
+
+			decoTop.style.transform = "translate3d(0, 0, 0)";
+			decoBottom.style.transform = "translate3d(0, 0, 0)";
+			text.style.transform = "translate3d(0, 0, 0)";
+
+			requestAnimationFrame(function() {
+				return btnLeave();
+			});
+
+		}
+
+
+
+		getMousePos();
+	</script>
+</body>
+</html>
