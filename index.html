@@ -14,10 +14,14 @@
 			margin: 0;
 			justify-content: center;
 			align-items: center;
+			background: #111;
+			color: #fff;
 			font-family: 'Roboto', sans-serif;
+			transition: background .2s linear;
 		}
 		body.btn-hover {
 			cursor: pointer;
+			background: rgb(22, 27, 22);
 		}
 		.content {
 			width: 100%;
@@ -29,14 +33,14 @@
 			-moz-appearance: none;
 			-webkit-appearance: none;
 			border: 0;
-			color: #111;
+			color: inherit;
 			background: none;
-			width: 10rem;
-			height: 10rem;
+			width: 7rem;
+			height: 7rem;
 			padding: 0;
-			margin: 1rem;
+			margin: 1.1rem;
 			font-family: inherit;
-			font-size: 1.2rem;
+			font-size: 1rem;
 			position: relative;
 		}
 
@@ -44,7 +48,6 @@
 		.button--hover {
 			outline: none;
 			border-color: #31a290;
-			color: #111;
 			background: transparent;
 		}
 		.button__deco {
@@ -53,8 +56,8 @@
 			left: 0;
 			bottom: 0;
 			right: 0;
-			width: 80%;
-			height: 80%;
+			width: 100%;
+			height: 100%;
 			margin: auto;
 			border-width: 1px;
 			border-style: solid;
@@ -62,18 +65,72 @@
 		}
 		.button__deco--1 {
 			border-color: #5a5456;
+			transition: .3s linear;
 		}
 		.button--hover .button__deco--1 {
 			border-color: #31a290;
+			transition: .1s linear;
 		}
 		.button__deco--2 {
 			border-color: #5a5456;
+			transition: .4s linear;
 		}
 		.button--hover .button__deco--2 {
 			border-color: #31a290;
+			transition: .2s linear;
 		}
-		.button__text {
+		.button__inner {
+			position: relative;
+			width: 100%;
+			height: 100%;
+			margin: auto;
 			overflow: hidden;
+			transition: .3s linear;
+		}
+		.button__inner .button__inner--deep {
+			position: absolute;
+			display: flex;
+			top: 0;
+			left: 0;
+			bottom: 0;
+			right: 0;
+			width: 30%;
+			height: 20%;
+			margin: auto;
+			justify-content: space-between;
+			flex-direction: column;
+		}
+		body.button--hover .button__inner {
+			transition: .2s linear;
+		}
+		.button__inner--deep .button__inner-hamburger {
+			width: 100%;
+			height: 3px;
+			transition: width .1s ease;
+		}
+		.button__inner--deep.button__inner--2 {
+			clip-path: inset(0 100% 0 0);
+			transition: .2s ease;
+		}
+		.button--hover .button__inner--deep.button__inner--2 {
+			clip-path: inset(0 0 0 0);
+		}
+		.button__inner--deep.button__inner--1 .button__inner-hamburger {
+			background: rgba(255, 255, 255, .45);
+		}
+		.button__inner--deep.button__inner--2 .button__inner-hamburger {
+			background: #fff;
+		}
+
+		.button__inner--deep .button__inner-hamburger.burger--2 {
+			width: 80%;
+		}
+		.button__inner--deep .button__inner-hamburger.burger--3 {
+			width: 60%;
+		}
+		.button--hover .button__inner-hamburger.burger--2,
+		.button--hover .button__inner-hamburger.burger--3 {
+			width: 100%;
 		}
 	</style>
 </head>
@@ -82,9 +139,18 @@
 		<button class="button">
 			<div class="button__deco button__deco--2"></div>
 			<div class="button__deco button__deco--1""></div>
-			<span class="button__text">
-				<span class="button__text-inner">Menu</span>
-			</span>
+			<div class="button__inner">
+				<div class="button__inner--deep button__inner--1">
+					<div class="button__inner-hamburger burger--1"></div>
+					<div class="button__inner-hamburger burger--2"></div>
+					<div class="button__inner-hamburger burger--3"></div>
+				</div>
+				<div class="button__inner--deep button__inner--2">
+					<div class="button__inner-hamburger burger--1"></div>
+					<div class="button__inner-hamburger burger--2"></div>
+					<div class="button__inner-hamburger burger--3"></div>
+				</div>
+			</div>
 		</button>
 	</div>
 
@@ -93,7 +159,7 @@
 
 		decoTop = document.querySelector('.button__deco--1')
 		decoBottom = document.querySelector('.button__deco--2')
-		text = document.querySelector('.button__text')
+		text = document.querySelector('.button__inner')
 
 		lerp = function lerp(a, b, n) {
 			return (1 - n) * a + n * b;
@@ -126,21 +192,23 @@
 
 		rect = btn.getBoundingClientRect();
 		distanceToTrigger = rect.width * 1.5;
+		window.addEventListener('resize', () => {
+			rect = btn.getBoundingClientRect();
+			distanceToTrigger = rect.width * 1.5;
+		})
 
-		var getMousePos = () => {
+		var initEv = () => {
 			window.addEventListener('mousemove', (e) => {
 				if(e) {
 					posX = e.clientX;
 					posY = e.clientY;
-					distance(posX, posY, rect.left + rect.width / 2, rect.top + rect.height / 2);
 					getDistance();
 
 					var x = 0;
 					var y = 0;
-
 					if(distanceMouseButton < distanceToTrigger) {
 						btnEnter();
-			
+
 						btn.classList.add('button--hover')
 						document.body.classList.add('btn-hover')
 
@@ -151,7 +219,7 @@
 						rendererStyle['ty'].current = rendererStyle['ty2'].current = y;
 					} else {
 						btnLeave();
-						
+
 						btn.classList.remove('button--hover')
 						document.body.classList.remove('btn-hover')
 					}
@@ -170,26 +238,21 @@
 		}
 
 		var btnEnter = () => {
-
-
 			for (var key in this.rendererStyle) {
 				rendererStyle[key].previous = (0, lerp)(rendererStyle[key].previous,
-				rendererStyle[key].current, 
+				rendererStyle[key].current,
 				rendererStyle[key].amt);
 			}
 
 			decoTop.style.transform = "translate3d(".concat(rendererStyle['tx'].previous, "px, ").concat(rendererStyle['ty'].previous, "px, 0)");
 			decoBottom.style.transform = "translate3d(".concat(rendererStyle['tx2'].previous, "px, ").concat(rendererStyle['ty2'].previous, "px, 0)");
             text.style.transform = "translate3d(".concat(rendererStyle['tx'].previous * 0.5, "px, ").concat(rendererStyle['ty'].previous * 0.5, "px, 0)");
-
-			
 			requestAnimationFrame(function() {
 				return btnEnter();
 			});
 		}
 
 		var btnLeave = () => {
-
 			decoTop.style.transform = "translate3d(0, 0, 0)";
 			decoBottom.style.transform = "translate3d(0, 0, 0)";
 			text.style.transform = "translate3d(0, 0, 0)";
@@ -201,8 +264,7 @@
 		}
 
 
-
-		getMousePos();
+		initEv();
 	</script>
 </body>
 </html>
